@@ -1,0 +1,22 @@
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/transportdb?currentSchema=transport_schema
+    username: transport
+    password: DefDevilinme@001
+  jpa:
+    hibernate:
+      default_schema: transport_schema
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    org.springframework.jdbc.datasource: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+

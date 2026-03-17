@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+          "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+          "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+
+  <!-- Global configuration -->
+  <property name="charset" value="UTF-8"/>
+
+  <!-- ✅ Place JavadocPackage directly under Checker 
+  
+  <module name="JavadocPackage">
+    <property name="allowLegacy" value="true"/>
+  </module>
+  
+  -->
+  
+  <!-- TreeWalker module holds most code-level checks
+  
+  <module name="TreeWalker">
+    # Add other checks here (e.g., JavadocMethod, Naming, etc.)
+  </module>
+
+  -->
+  
+</module>
+

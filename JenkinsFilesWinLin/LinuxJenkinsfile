@@ -1,0 +1,194 @@
+pipeline {
+    agent any
+
+    environment {
+        MAVEN_HOME = '/usr/share/maven' // Adjust if needed
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk' // Adjust to match your JDK
+        TF_VERSION = ">=1.5.0"
+        CHECKOV_OUTPUT = "checkov-results.json"
+        POLICY_DIR = "policies/"
+        PLAN_JSON = "terraform.plan.json"
+    }
+
+    tools {
+        maven 'Maven 3' // Define this in Jenkins global tools config
+        jdk 'JDK 17'    // Define this in Jenkins global tools config
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git credentialsId: 'f6bdf992-9da3-49fa-bf54-06bcc93df8ac',
+                    url: 'https://github.com/Full-Stack-Sanctus/transportApi_SecDevOps.git',
+                    branch: 'main'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo '📦 Building the Spring Boot project...'
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+        
+        stage('Upload JAR to S3') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                      echo "☁️ Uploading app.jar to S3..."
+                      aws s3 cp target/app.jar s3://my-bucket/app.jar
+                    '''
+                }
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    dir('terraform') {
+                        sh 'terraform init'
+                    }
+                }
+            }
+        }
+    
+        stage('Terraform Plan') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    dir('terraform') {
+                        sh '''
+                          terraform plan -out=tfplan
+                          terraform show -json tfplan > terraform.plan.json
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Run Policy as Code (Conftest)') {
+            steps {
+                dir('terraform') {
+                    sh '''
+                      echo "⚡ Running Conftest..."
+                      conftest test ${PLAN_JSON} --policy ${POLICY_DIR} || {
+                        echo "❌ Conftest failed. Policy violations detected."
+                        exit 1
+                      }
+                    '''
+                }
+            }
+        }
+
+        stage('Run Policy as Code (OPA)') {
+            steps {
+                dir('terraform') {
+                    sh '''
+                      echo "🔎 Running OPA Policy Checks..."
+                      opa eval --input terraform.plan.json --data policies/ \
+                       --format=pretty "data.terraform.deny" > policy-results.txt
+
+                      cat policy-results.txt
+
+                      if grep -q "deny" policy-results.txt; then
+                        echo "❌ OPA Policy check failed."
+                        exit 1
+                      else
+                        echo "✅ OPA Policy check passed."
+                      fi
+                    '''
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            when {
+                expression { return currentBuild.currentResult == 'SUCCESS' }
+            }
+            steps {
+                input "Approve to Apply?"
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    dir('terraform') {
+                        sh 'terraform apply tfplan'
+                    }
+                }
+            }
+        }
+
+        stage('Run Compliance as Code (Checkov)') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    dir('terraform') {
+                        sh '''
+                          echo "🧪 Running Checkov scan..."
+                          checkov -d . --output json > checkov-results.json || true
+                        '''
+                    }
+                    archiveArtifacts artifacts: 'checkov-results.json'
+                }
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'ghcr-creds', 
+                    usernameVariable: 'DOCKER_USERNAME', 
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
+                    script {
+                        def imageName = "ghcr.io/full-stack-sanctus/transport-api"
+                        def imageTag = "v${env.BUILD_NUMBER}"
+
+                        sh """
+                          docker build -f Dockerfile -t ${imageName}:${imageTag} .
+                          echo "$DOCKER_PASSWORD" | docker login ghcr.io -u "$DOCKER_USERNAME" --password-stdin
+                          docker push ${imageName}:${imageTag}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo '🧪 Running tests...'
+                sh 'mvn test'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo '🚀 Deploying application (placeholder step)'
+                // Example: sh 'scp target/*.jar user@yourserver:/app'
+                // Example: sh 'aws deploy ...'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline completed successfully.'
+        }
+        failure {
+            echo '❌ Pipeline failed.'
+            mail to: 'secops@company.com',
+            subject: "Terraform Pipeline Failed ❌",
+            body: "Terraform or policy checks failed. Review Jenkins logs for full details."
+        }
+    }
+}
