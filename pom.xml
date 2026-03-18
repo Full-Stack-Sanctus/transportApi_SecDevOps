@@ -126,7 +126,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>8.4.0</version>
+                <version>12.0.0</version>
                 <executions>
                  <execution>
                   <goals>
@@ -134,6 +134,17 @@
                   </goals>
                  </execution>
                 </executions>
+                <configuration>
+                 <!-- Add a custom User-Agent to avoid NVD 403 errors -->
+                 <userAgent>TransportAPI-GitHubActions</userAgent>
+
+                 <!-- Optional: avoid failing on minor CVSS issues -->
+                 <failBuildOnCVSS>0</failBuildOnCVSS>
+
+                 <!-- Optional: enable data mirroring to reduce NVD requests -->
+                 <cveValidForHours>12</cveValidForHours>
+                 <dataMirroring>true</dataMirroring>
+                </configuration>
             </plugin>
 
             <plugin>
