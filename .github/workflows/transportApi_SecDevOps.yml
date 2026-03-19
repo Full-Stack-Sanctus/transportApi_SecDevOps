@@ -36,8 +36,11 @@ jobs:
       run: mvn checkstyle:check
 
     - name: Run OWASP Dependency-Check
-      run: mvn org.owasp:dependency-check-maven:check -DnvdApiKey=${{ secrets.NVD_API_KEY }}
-    
+      env:
+        # Standard variable name used by many NVD-consuming tools
+        NVD_API_KEY: ${{ secrets.NVD_API_KEY }} 
+      run: mvn org.owasp:dependency-check-maven:check -DautoUpdate=true -DnvdApiKey=$NVD_API_KEY
+        
     - name: Upload OWASP Dependency-Check Report
       uses: actions/upload-artifact@v4
       with:
