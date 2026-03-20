@@ -119,6 +119,9 @@
                     
                  <printFailingErrors>true</printFailingErrors>
                  <verbose>true</verbose>
+                 
+                 <!-- If you just want to get the build to pass to test the functionality, you can tell PMD to report but not fail the build -->
+               <!--  <failsOnError>true</failsOnError> -->
         
                  <forceJavacCompilerUse>true</forceJavacCompilerUse>
            
@@ -199,7 +202,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.15.0</version>
+                <version>3.28.0</version>
                 <executions>
                  <execution>
                   <phase>verify</phase>
