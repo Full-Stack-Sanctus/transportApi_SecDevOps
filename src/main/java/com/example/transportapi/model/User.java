@@ -1,7 +1,9 @@
 package com.example.transportapi.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,7 +14,6 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +31,7 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    // ✅ Defensive copy constructor
+    // ✅ Defensive constructor
     public User(Long id, String email, String password, boolean enabled, Set<Role> roles) {
         this.id = id;
         this.email = email;

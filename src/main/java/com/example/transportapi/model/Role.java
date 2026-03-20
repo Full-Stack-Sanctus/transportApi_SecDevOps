@@ -1,7 +1,9 @@
 package com.example.transportapi.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,7 +13,6 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,14 +24,14 @@ public class Role {
     @ManyToMany(mappedBy = "roles")
     private Set<User> users = new HashSet<>();
 
-    // ✅ Defensive copy constructor
+    // ✅ Defensive constructor
     public Role(Long id, String name, Set<User> users) {
         this.id = id;
         this.name = name;
         this.users = users != null ? new HashSet<>(users) : new HashSet<>();
     }
 
-    // ✅ Defensive getter to prevent external modification
+    // ✅ Defensive getter
     public Set<User> getUsers() {
         return Collections.unmodifiableSet(users);
     }
