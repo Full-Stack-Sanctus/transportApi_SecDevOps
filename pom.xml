@@ -77,6 +77,14 @@
             <artifactId>jjwt</artifactId>
             <version>0.9.1</version>
         </dependency>
+        
+        <!-- spotbugs annotations -->
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>4.9.8</version>
+            <scope>compile</scope>
+        </dependency>
 
         <!-- Swagger -->
         <dependency>
