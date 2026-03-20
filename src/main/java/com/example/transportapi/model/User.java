@@ -30,13 +30,22 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    // Safe getter
+    // ✅ Defensive copy constructor
+    public User(Long id, String email, String password, boolean enabled, Set<Role> roles) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.enabled = enabled;
+        this.roles = roles != null ? new HashSet<>(roles) : new HashSet<>();
+    }
+
+    // ✅ Defensive getter
     public Set<Role> getRoles() {
         return Collections.unmodifiableSet(roles);
     }
 
-    // Safe setter
+    // ✅ Defensive setter
     public void setRoles(Set<Role> roles) {
-        this.roles = new HashSet<>(roles);
+        this.roles = roles != null ? new HashSet<>(roles) : new HashSet<>();
     }
 }

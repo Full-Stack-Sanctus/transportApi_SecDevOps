@@ -23,13 +23,20 @@ public class Role {
     @ManyToMany(mappedBy = "roles")
     private Set<User> users = new HashSet<>();
 
-    // Safe getter
+    // ✅ Defensive copy constructor
+    public Role(Long id, String name, Set<User> users) {
+        this.id = id;
+        this.name = name;
+        this.users = users != null ? new HashSet<>(users) : new HashSet<>();
+    }
+
+    // ✅ Defensive getter to prevent external modification
     public Set<User> getUsers() {
         return Collections.unmodifiableSet(users);
     }
 
-    // Safe setter
+    // ✅ Defensive setter
     public void setUsers(Set<User> users) {
-        this.users = new HashSet<>(users);
+        this.users = users != null ? new HashSet<>(users) : new HashSet<>();
     }
 }
