@@ -1,4 +1,3 @@
-
 package com.example.transportapi.security;
 
 import com.example.transportapi.service.UserDetailsServiceImpl;
@@ -12,12 +11,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Spring manages the bean lifecycle; safe to store")
     private final JwtAuthFilter jwtAuthFilter;
+
     private final UserDetailsServiceImpl userDetailsService;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserDetailsServiceImpl userDetailsService) {

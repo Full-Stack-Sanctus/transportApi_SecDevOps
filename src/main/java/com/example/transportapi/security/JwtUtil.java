@@ -1,4 +1,3 @@
-
 package com.example.transportapi.security;
 
 import io.jsonwebtoken.*;
@@ -9,8 +8,10 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private final String SECRET_KEY = "secure_key";
-    private final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 hour
+
+    // ✅ Make constants static and final
+    private static final String SECRET_KEY = "secure_key";
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 hour
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
