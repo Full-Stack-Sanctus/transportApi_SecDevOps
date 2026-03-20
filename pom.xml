@@ -116,12 +116,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    
-                 <printFailingErrors>true</printFailingErrors>
-                 <verbose>true</verbose>
-                 
-                 <!-- If you just want to get the build to pass to test the functionality, you can tell PMD to report but not fail the build -->
-               <!--  <failsOnError>true</failsOnError> -->
         
                  <forceJavacCompilerUse>true</forceJavacCompilerUse>
            
@@ -135,6 +129,7 @@
                 
                  <source>17</source>       <!-- or 11 if you're on Java 11 -->
                  <target>17</target>
+                 
                 </configuration>
             </plugin>
 
@@ -204,6 +199,9 @@
                 <artifactId>maven-pmd-plugin</artifactId>
                 <version>3.28.0</version>
                 <configuration>
+                    
+                    <!-- If you just want to get the build to pass to test the functionality, you can tell PMD to report but not fail the build -->
+                    <!--  <failsOnError>true</failsOnError> -->
                     
                     <!-- This will print violations directly in your console -->
                     <printFailingErrors>true</printFailingErrors>
