@@ -117,6 +117,9 @@
                 <version>3.13.0</version>
                 <configuration>
                     
+                 <printFailingErrors>true</printFailingErrors>
+                 <verbose>true</verbose>
+        
                  <forceJavacCompilerUse>true</forceJavacCompilerUse>
            
                  <annotationProcessorPaths> <!-- to use Lombok during the compilation phase -->
